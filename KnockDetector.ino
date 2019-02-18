@@ -1,7 +1,7 @@
 
-int g_spacing = 100; // 100ms per period
-int g_delta = 20; // +- 20 ms
-byte g_knockArray[] = { 1, 1}; //, 1, 1, 1 };
+int g_spacing = 250; // 250ms per period
+int g_delta = 50; // +- 50 ms
+byte g_knockArray[] = { 2, 1, 2}; //, 1, 1, 1 };
 byte g_knockPosition = 0; // start at the beginning
 byte g_maxKnocks;
 
@@ -36,7 +36,7 @@ void setup() {
   }
   g_maxSequenceTime += g_spacing; // pad a little for slop
 
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   Serial.print("Max Sequence Time: ");
   Serial.println(g_maxSequenceTime);
@@ -48,12 +48,18 @@ void InvalidSequence()
 {
   g_knockPosition = 0;
   
+  Serial.println("Invalid sequence");
+
   tone(g_sound, 261);
   delay(750);
   tone(g_sound, 151);
   delay(1250);
 
   noTone(g_sound);
+
+  g_buttonPressed = false; // effectively ignore anything while making sound
+
+  Serial.println("Ready.");
 }
 
 void loop() {
@@ -76,11 +82,14 @@ void loop() {
       Serial.println("Match time");
       g_knockPosition++;
       if (g_knockPosition == g_maxKnocks) {
+        Serial.println("Door open!!!!!!!!!!!!!!!");
         g_sequenceStarted = false;
         digitalWrite(g_magneticOutput, HIGH);
         // reset?
       } else {
+        Serial.print("Next time: ");
         g_nextTime = (g_knockArray[g_knockPosition] * g_spacing) + currentTime;
+        Serial.println(g_nextTime);
       }
     } else if (g_sequenceStarted == true) {
       Serial.print("Out of band: ");
